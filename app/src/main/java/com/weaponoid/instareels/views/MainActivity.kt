@@ -3,13 +3,14 @@ package com.weaponoid.instareels.views
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.tabs.TabLayoutMediator
 import com.weaponoid.instareels.adapters.ViewPagerAdapter
-import com.whileloop.instareels.R
+import com.weaponoid.instareels.R
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -24,8 +25,6 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.elevation = 0F
 
         checkPermission()
-
-
 
     }
 

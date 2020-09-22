@@ -115,8 +115,5 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun deleteDocument(document: Document?) {
-        executorService.execute { dao.delete(document) }
-    }
 
 }

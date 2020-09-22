@@ -5,44 +5,41 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.weaponoid.instareels.R
-import java.io.File
+import com.weaponoid.instareels.persistance.Document
+import com.weaponoid.instareels.utils.loadListImage
+import kotlinx.android.synthetic.main.item_view.view.*
 
-class PostsListAdapter(val postsList: ArrayList<File>) :
-    RecyclerView.Adapter<PostsListAdapter.viewHolder>() {
+class PostsListAdapter(private var postsList: MutableList<Document>) :
+    RecyclerView.Adapter<PostsListAdapter.ViewHolder>() {
 
 
-    fun updateUiList(newUiList: ArrayList<File>) {
+    fun updateUiList(newPostList: MutableList<Document>) {
         postsList.clear()
-        postsList.addAll(newUiList)
+        postsList.addAll(newPostList)
         notifyDataSetChanged()
     }
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): viewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_view, parent, false)
-        return viewHolder(view)
+        return ViewHolder(view)
     }
 
     override fun getItemCount() = postsList.size
 
-    override fun onBindViewHolder(holder: viewHolder, position: Int) {
-//        val file = fileList[position]
-//        holder.view.imageListImage.loadListImage(Uri.parse(file.absolutePath).toString())
-//        val fileName = File(file.absolutePath).name
-//        if(fileName.endsWith(".jpg") || fileName.endsWith(".gif")){
-//            holder.view.playVideo.visibility = View.GONE
-//        }
-//        holder.view.imageListImage.setOnClickListener {
-//            val intent = Intent(holder.view.context, ImagesDetail::class.java)
-//            intent.putExtra("imagePath", file.absolutePath)
-//            holder.view.context.startActivity(intent)
-//
-//        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
+        val post = postsList[position]
+        holder.view.postImage.loadListImage(post.videoUri)
+        holder.view.caption.text = post.caption
+        holder.view.dp.loadListImage(post.dpUrl)
+        holder.view.handle.text = post.handle
+
     }
 
-    class viewHolder(var view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(var view: View) : RecyclerView.ViewHolder(view) {
 
     }
 }

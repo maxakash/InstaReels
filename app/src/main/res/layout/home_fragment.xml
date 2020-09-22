@@ -22,15 +22,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/url"
+                android:id="@+id/editText"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                android:maxLines="1"
+                android:lines="1"
                 android:background="@android:color/transparent"
                 android:backgroundTint="#fff"
                 android:hint="Paste your reel URL here"
@@ -70,7 +71,7 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/listImage"
+                android:id="@+id/postImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
@@ -164,6 +165,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
                     android:gravity="start"
                     android:orientation="horizontal">
 

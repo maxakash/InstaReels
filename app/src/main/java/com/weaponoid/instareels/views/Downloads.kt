@@ -1,19 +1,25 @@
 package com.weaponoid.instareels.views
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.weaponoid.instareels.R
-import com.weaponoid.instareels.views.DownloadsViewModel
+import com.weaponoid.instareels.adapters.PostsListAdapter
+import com.weaponoid.instareels.persistance.Document
+import kotlinx.android.synthetic.main.downloads_fragment.*
 
 class Downloads : Fragment() {
 
 
     private lateinit var viewModel: DownloadsViewModel
+    private lateinit var listAdapter: PostsListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -23,9 +29,25 @@ class Downloads : Fragment() {
     }
 
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this).get(DownloadsViewModel::class.java)
+        viewModel.init(requireActivity())
+        val mutableList = mutableListOf<Document>()
+        listAdapter = PostsListAdapter(mutableList)
+
+        downloadPosts.apply {
+            adapter = listAdapter
+            layoutManager =
+                GridLayoutManager(requireContext(), 2, LinearLayoutManager.VERTICAL, false)
+        }
+
+
+        viewModel.getAllDocuments()?.observe(viewLifecycleOwner, {
+            listAdapter.updateUiList(it)
+            println("size is ${it.size}")
+        })
+
     }
 
 }

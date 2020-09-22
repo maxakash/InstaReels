@@ -5,8 +5,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.whileloop.instareels.views.Downloads;
-import com.whileloop.instareels.views.Home;
+import com.weaponoid.instareels.views.Downloads;
+import com.weaponoid.instareels.views.Home;
+
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
 

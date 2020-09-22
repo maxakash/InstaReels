@@ -1,5 +1,8 @@
 package com.weaponoid.instareels.views
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,16 +10,23 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.snackbar.Snackbar
-import com.weaponoid.instareels.persistance.Document
-import com.weaponoid.instareels.utils.loadListImage
-import com.weaponoid.instareels.viewmodels.HomeViewModel
 import com.weaponoid.instareels.R
+import com.weaponoid.instareels.persistance.Document
+import com.weaponoid.instareels.utils.failedToast
+import com.weaponoid.instareels.utils.infoToast
+import com.weaponoid.instareels.utils.loadListImage
+import com.weaponoid.instareels.utils.successToast
+import com.weaponoid.instareels.viewmodels.HomeViewModel
+import io.reactivex.exceptions.UndeliverableException
+import io.reactivex.plugins.RxJavaPlugins
 import kotlinx.android.synthetic.main.home_fragment.*
 import kotlinx.coroutines.*
 import zlc.season.rxdownload4.file
 import zlc.season.rxdownload4.manager.*
 import zlc.season.rxdownload4.task.Task
+import zlc.season.rxdownload4.utils.log
+import java.io.File
+
 
 class Home : Fragment() {
 
@@ -26,8 +36,12 @@ class Home : Fragment() {
     private lateinit var postData: HashMap<String, String>
     private lateinit var dpUrl: String
     private lateinit var fileUri: String
-
+    private lateinit var dpUri: String
+    private lateinit var disposable1: TaskManager
+    private lateinit var disposable2: TaskManager
     var allReels: List<Document>? = null
+    private lateinit var clipboardManager: ClipboardManager
+    private lateinit var lastPostData: Document
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,13 +58,28 @@ class Home : Fragment() {
 
         viewModel.init(requireContext())
 
+        clipboardManager =
+            (requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?)!!
+
         downloadReel.setOnClickListener {
-            validateUrl(url.text.toString())
+            validateUrl(editText.text.toString())
             lastPost.visibility = View.VISIBLE
 
         }
 
         setLastPost()
+
+        getCopiedData()
+
+        onClick()
+
+        RxJavaPlugins.setErrorHandler {
+            if (it is UndeliverableException) {
+                //do nothing
+            } else {
+                it.log()
+            }
+        }
     }
 
 
@@ -62,8 +91,7 @@ class Home : Fragment() {
             lastPost.visibility = View.VISIBLE
 
             dp.loadListImage(post.dpUrl)
-
-            listImage.loadListImage(post.videoUri)
+            postImage.loadListImage(post.videoUri)
             caption.text = post.caption
             handle.text = post.handle
 
@@ -71,56 +99,60 @@ class Home : Fragment() {
                 isVideo.visibility = View.GONE
                 isImage.visibility = View.VISIBLE
             }
-
+            lastPostData = post
         }
+    }
+
+    private fun getCopiedData() {
+        val clipData: ClipData? = clipboardManager.primaryClip
+        val item = clipData?.getItemAt(0)
+        val url = item?.text.toString()
+
+        if (url != " " && url.startsWith("https://") || url.startsWith("http://")) {
+            requireContext().infoToast("Validating copied link")
+            validateUrl(url)
+        }
+
+
     }
 
 
     private fun validateUrl(url: String) {
 
         if (url.isEmpty()) {
-            Snackbar.make(
-                home_root,
-                "URL cannot be empty",
-                Snackbar.LENGTH_SHORT
-            ).show()
+            requireContext().failedToast("URL cannot be empty")
         } else if (!viewModel.validateUrl(url)) {
-            Snackbar.make(
-                home_root,
-                "Invalid URL entered",
-                Snackbar.LENGTH_SHORT
-            ).show()
+            requireContext().infoToast("Invalid link entered")
         } else {
 
+            editText.clearFocus()
+            editText.requestFocus()
             circularProgressBar.visibility = View.VISIBLE
-            circularProgressBar.indeterminateMode = true
+            circularProgressBar.progress = 0f
             uiScope.launch {
                 postData = withContext(Dispatchers.IO) { viewModel.getMediaUrl(url) }
 
-                listImage.loadListImage(postData["thumbnail"].toString())
-                handle.text = postData["handle"].toString()
-                caption.text = postData["caption"].toString()
-
-                withContext(Dispatchers.IO) {
-                    dpUrl =
-                        viewModel.getDP("https://www.instagram.com/${postData["handle"].toString()}/?__a=1")
-                }
-
-                if (postData["isVideo"].equals("false")) {
-                    isVideo.visibility = View.GONE
-                    isImage.visibility = View.VISIBLE
-                }
-
-                dp.loadListImage(dpUrl)
-
                 val mediaUrl = postData["mediaUrl"]!!
-                if (mediaUrl.isEmpty()) {
-                    Snackbar.make(
-                        home_root,
-                        "Couldn't load the media file properly",
-                        Snackbar.LENGTH_SHORT
-                    ).show()
+
+                if (mediaUrl == "") {
+                    requireContext().failedToast("Couldn't load the media file properly")
                 } else {
+                    postImage.loadListImage(postData["thumbnail"].toString())
+                    handle.text = postData["handle"].toString()
+                    caption.text = postData["caption"].toString()
+
+                    withContext(Dispatchers.IO) {
+                        dpUrl =
+                            viewModel.getDP("https://www.instagram.com/${postData["handle"].toString()}/?__a=1")
+                    }
+
+                    if (postData["isVideo"].equals("false")) {
+                        isVideo.visibility = View.GONE
+                        isImage.visibility = View.VISIBLE
+                    }
+
+                    dp.loadListImage(dpUrl)
+
                     download(mediaUrl)
                 }
 
@@ -132,8 +164,8 @@ class Home : Fragment() {
 
     private fun download(url: String) {
         uiScope.launch {
-            val path = requireContext().getExternalFilesDir("InstaReels")
-            val disposable = Task(url = url, savePath = path!!.path).manager().apply {
+            val path = requireContext().getExternalFilesDir("temp")
+            disposable1 = Task(url = url, savePath = path!!.path).manager().apply {
                 subscribe { status ->
                     when (status) {
                         is Completed -> {
@@ -141,22 +173,24 @@ class Home : Fragment() {
                             circularProgressBar.visibility = View.GONE
 
                             downloadDp(dpUrl, postData["handle"].toString())
-                            val file = url.file()
-                            fileUri = Uri.fromFile(file).toString()
+
+                            val videoFile = File(
+                                requireContext().getExternalFilesDir("InstaReels"),
+                                url.file().name
+                            )
+                            url.file().copyTo(videoFile, true)
+                            fileUri = Uri.fromFile(videoFile).toString()
+
+                            postImage.loadListImage(fileUri)
 
                         }
                         is Failed -> {
                             println("failed download $status")
                         }
-                        is Started -> {
-                            circularProgressBar.indeterminateMode = false
-                        }
 
                         is Downloading -> {
-                            //println(status.progress.percent())
                             circularProgressBar.apply {
                                 progress = status.progress.percent().toFloat()
-                                setProgressWithAnimation(65f, 1000)
 
                             }
                         }
@@ -172,31 +206,23 @@ class Home : Fragment() {
 
 
     private fun downloadDp(url: String, username: String) {
-        println("reached here")
         uiScope.launch {
-            val path = requireContext().getExternalFilesDir("InstaReels")
-            val disposable =
+            val path = requireContext().getExternalFilesDir("temp")
+            disposable2 =
                 Task(url = url, savePath = path!!.path, saveName = "$username.png").manager()
                     .apply {
                         subscribe { status ->
                             when (status) {
                                 is Completed -> {
                                     println("dp downloaded")
-                                    val newPost = Document()
-                                    val dp = url.file()
+                                    val dpFile = File(
+                                        requireContext().getExternalFilesDir("InstaReels"),
+                                        "$username.png"
+                                    )
+                                    url.file().copyTo(dpFile, true)
 
-                                    println(postData.toString())
-                                    newPost.caption = postData["caption"].toString()
-                                    newPost.hashtag = postData["hashtag"].toString()
-                                    newPost.shareUrl = postData["shareUrl"].toString()
-                                    newPost.videoUri = fileUri
-                                    newPost.handle = postData["handle"].toString()
-                                    newPost.dpUrl = Uri.fromFile(dp).toString()
-                                    newPost.caption = postData["caption"].toString()
-                                    newPost.isVideo = postData["isVideo"].toString()
-
-                                    viewModel.saveDocument(newPost)
-
+                                    dpUri = Uri.fromFile(dpFile).toString()
+                                    saveDoc()
 
                                 }
                                 is Failed -> {
@@ -210,6 +236,74 @@ class Home : Fragment() {
                     }
 
         }
+
+    }
+
+
+    private fun saveDoc() {
+        val newPost = Document()
+        newPost.caption = postData["caption"].toString()
+        newPost.hashtag = postData["hashtag"].toString()
+        newPost.shareUrl = postData["shareUrl"].toString()
+        newPost.videoUri = fileUri
+        newPost.handle = postData["handle"].toString()
+        newPost.dpUrl = dpUri
+        newPost.caption = postData["caption"].toString()
+        newPost.isVideo = postData["isVideo"].toString()
+
+        viewModel.saveDocument(newPost)
+
+        editText.text.clear()
+        editText.clearFocus()
+        requireContext().successToast("Download Completed")
+
+
+        disposable1.delete()
+        disposable2.delete()
+
+
+        val clip = ClipData.newPlainText("label", "")
+        clipboardManager.setPrimaryClip(clip)
+    }
+
+
+    fun onClick() {
+
+        captionButton.setOnClickListener {
+            if (this::postData.isInitialized) {
+                val clip = ClipData.newPlainText("label", postData["caption"].toString())
+                clipboardManager.setPrimaryClip(clip)
+            } else if (this::lastPostData.isInitialized) {
+                val clip = ClipData.newPlainText("label", lastPostData.caption)
+                clipboardManager.setPrimaryClip(clip)
+            }
+
+            requireContext().successToast("Caption copied to clipboard.")
+        }
+
+        hashtagButton.setOnClickListener {
+            if (this::postData.isInitialized) {
+                val clip = ClipData.newPlainText("label", postData["hashtag"].toString())
+                clipboardManager.setPrimaryClip(clip)
+            } else if (this::lastPostData.isInitialized) {
+                val clip = ClipData.newPlainText("label", lastPostData.hashtag)
+                clipboardManager.setPrimaryClip(clip)
+            }
+            requireContext().successToast("Hashtags copied to clipboard.")
+        }
+
+        shareButton.setOnClickListener {
+
+        }
+
+        repostButton.setOnClickListener {
+
+        }
+
+        openPostButton.setOnClickListener {
+
+        }
+
 
     }
 

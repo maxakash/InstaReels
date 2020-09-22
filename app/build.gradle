@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "com.whileloop.instareels"
+        applicationId 'com.weaponoid.instareels'
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1

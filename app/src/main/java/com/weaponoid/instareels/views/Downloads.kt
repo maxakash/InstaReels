@@ -5,14 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.weaponoid.instareels.R
 import com.weaponoid.instareels.adapters.PostsListAdapter
 import com.weaponoid.instareels.persistance.Document
+import com.weaponoid.instareels.viewmodels.DownloadsViewModel
 import kotlinx.android.synthetic.main.downloads_fragment.*
 
 class Downloads : Fragment() {

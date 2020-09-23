@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 @Entity
@@ -26,6 +28,7 @@ public class Document {
     @NonNull
     private String videoUri;
 
+    @NonNull
     private String postUrl;
 
     @NonNull
@@ -36,6 +39,9 @@ public class Document {
 
     @NonNull
     private String isVideo;
+
+    @NonNull
+    private String fileName;
 
     private ArrayList<String> imagesUri;
 
@@ -116,7 +122,7 @@ public class Document {
         return handle;
     }
 
-    public void setHandle(String handle) {
+    public void setHandle(@NotNull String handle) {
         this.handle = handle;
     }
 
@@ -125,8 +131,18 @@ public class Document {
         return isVideo;
     }
 
-    public void setIsVideo(String isVideo) {
+    public void setIsVideo(@NotNull String isVideo) {
         this.isVideo = isVideo;
     }
+
+    @NonNull
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(@NotNull String fileName) {
+        this.fileName = fileName;
+    }
+
 
 }

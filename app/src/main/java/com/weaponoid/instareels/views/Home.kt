@@ -1,13 +1,15 @@
 package com.weaponoid.instareels.views
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import android.content.*
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.weaponoid.instareels.R
@@ -17,14 +19,11 @@ import com.weaponoid.instareels.utils.infoToast
 import com.weaponoid.instareels.utils.loadListImage
 import com.weaponoid.instareels.utils.successToast
 import com.weaponoid.instareels.viewmodels.HomeViewModel
-import io.reactivex.exceptions.UndeliverableException
-import io.reactivex.plugins.RxJavaPlugins
 import kotlinx.android.synthetic.main.home_fragment.*
 import kotlinx.coroutines.*
 import zlc.season.rxdownload4.file
 import zlc.season.rxdownload4.manager.*
 import zlc.season.rxdownload4.task.Task
-import zlc.season.rxdownload4.utils.log
 import java.io.File
 
 
@@ -42,6 +41,8 @@ class Home : Fragment() {
     var allReels: List<Document>? = null
     private lateinit var clipboardManager: ClipboardManager
     private lateinit var lastPostData: Document
+    private lateinit var fileName: String
+    private lateinit var postUrl: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,13 +74,6 @@ class Home : Fragment() {
 
         onClick()
 
-        RxJavaPlugins.setErrorHandler {
-            if (it is UndeliverableException) {
-                //do nothing
-            } else {
-                it.log()
-            }
-        }
     }
 
 
@@ -112,10 +106,7 @@ class Home : Fragment() {
             requireContext().infoToast("Validating copied link")
             validateUrl(url)
         }
-
-
     }
-
 
     private fun validateUrl(url: String) {
 
@@ -125,6 +116,8 @@ class Home : Fragment() {
             requireContext().infoToast("Invalid link entered")
         } else {
 
+            postUrl = url
+            lastPost.visibility = View.VISIBLE
             editText.clearFocus()
             editText.requestFocus()
             circularProgressBar.visibility = View.VISIBLE
@@ -141,10 +134,14 @@ class Home : Fragment() {
                     handle.text = postData["handle"].toString()
                     caption.text = postData["caption"].toString()
 
-                    withContext(Dispatchers.IO) {
-                        dpUrl =
-                            viewModel.getDP("https://www.instagram.com/${postData["handle"].toString()}/?__a=1")
-                    }
+
+                    Log.i(
+                        "akash",
+                        "https://www.instagram.com/${postData["handle"].toString()}/?__a=1"
+                    )
+
+                    dpUrl =
+                        withContext(Dispatchers.IO) { viewModel.getDP("https://www.instagram.com/${postData["handle"].toString()}/?__a=1") }
 
                     if (postData["isVideo"].equals("false")) {
                         isVideo.visibility = View.GONE
@@ -178,6 +175,10 @@ class Home : Fragment() {
                                 requireContext().getExternalFilesDir("InstaReels"),
                                 url.file().name
                             )
+
+                            fileName = videoFile.name
+
+                            println(fileName)
                             url.file().copyTo(videoFile, true)
                             fileUri = Uri.fromFile(videoFile).toString()
 
@@ -248,8 +249,10 @@ class Home : Fragment() {
         newPost.videoUri = fileUri
         newPost.handle = postData["handle"].toString()
         newPost.dpUrl = dpUri
+        newPost.postUrl = postUrl
         newPost.caption = postData["caption"].toString()
         newPost.isVideo = postData["isVideo"].toString()
+        newPost.fileName = fileName
 
         viewModel.saveDocument(newPost)
 
@@ -267,9 +270,15 @@ class Home : Fragment() {
     }
 
 
-    fun onClick() {
+    private fun onClick() {
 
         captionButton.setOnClickListener {
+
+            allReels = viewModel.getAllDocuments()
+            if (allReels?.isNotEmpty()!!) {
+                lastPostData = allReels!![0]
+            }
+
             if (this::postData.isInitialized) {
                 val clip = ClipData.newPlainText("label", postData["caption"].toString())
                 clipboardManager.setPrimaryClip(clip)
@@ -282,6 +291,12 @@ class Home : Fragment() {
         }
 
         hashtagButton.setOnClickListener {
+
+            allReels = viewModel.getAllDocuments()
+            if (allReels?.isNotEmpty()!!) {
+                lastPostData = allReels!![0]
+            }
+
             if (this::postData.isInitialized) {
                 val clip = ClipData.newPlainText("label", postData["hashtag"].toString())
                 clipboardManager.setPrimaryClip(clip)
@@ -294,14 +309,138 @@ class Home : Fragment() {
 
         shareButton.setOnClickListener {
 
+            allReels = viewModel.getAllDocuments()
+            if (allReels?.isNotEmpty()!!) {
+                lastPostData = allReels!![0]
+            }
+
+            var name = ""
+
+            if (this::lastPostData.isInitialized) {
+                name = lastPostData.fileName
+
+            } else if (this::postData.isInitialized) {
+
+                name = fileName
+
+            }
+            val intent = Intent(Intent.ACTION_SEND)
+            val sd = requireContext().getExternalFilesDir("InstaReels")
+            val toShare = File(sd, name)
+
+            println(toShare.exists())
+            val authority = "com.weaponoid.instareels.provider"
+            val contentUri = FileProvider.getUriForFile(requireContext(), authority, toShare)
+            intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+
+            intent.type = "image/*"
+
+            val chooser = Intent.createChooser(intent, "Share File")
+
+            val resInfoList: List<ResolveInfo> = requireActivity().packageManager
+                .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
+
+            for (resolveInfo in resInfoList) {
+                val packageName = resolveInfo.activityInfo.packageName
+                requireContext().grantUriPermission(
+                    packageName,
+                    contentUri,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+
+            startActivity(chooser)
         }
 
         repostButton.setOnClickListener {
+            allReels = viewModel.getAllDocuments()
+            if (allReels?.isNotEmpty()!!) {
+                lastPostData = allReels!![0]
+            }
+
+            var name = ""
+
+            val intent = Intent(Intent.ACTION_SEND)
+
+            if (this::lastPostData.isInitialized) {
+                name = lastPostData.fileName
+                if (lastPostData.isVideo == "true") {
+                    intent.type = "video"
+                } else {
+                    intent.type = "image/jpeg"
+                }
+
+            } else if (this::postData.isInitialized) {
+
+                name = fileName
+                if (postData["isVideo"] == "true") {
+                    intent.type = "video"
+                } else {
+                    intent.type = "image/jpeg"
+                }
+
+            }
+
+            val sd = requireContext().getExternalFilesDir("InstaReels")
+            val toShare = File(sd, name)
+
+            val authority = "com.weaponoid.instareels.provider"
+            val contentUri = FileProvider.getUriForFile(requireContext(), authority, toShare)
+            intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            intent.setPackage("com.instagram.android")
+
+            val chooser = Intent.createChooser(intent, "Share File")
+
+            val resInfoList: List<ResolveInfo> = requireActivity().packageManager
+                .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
+
+            for (resolveInfo in resInfoList) {
+                val packageName = resolveInfo.activityInfo.packageName
+                requireContext().grantUriPermission(
+                    packageName,
+                    contentUri,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+
+            startActivity(chooser)
 
         }
 
         openPostButton.setOnClickListener {
 
+            allReels = viewModel.getAllDocuments()
+            if (allReels?.isNotEmpty()!!) {
+                lastPostData = allReels!![0]
+            }
+
+            try {
+
+                println(lastPostData.postUrl)
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(lastPostData.postUrl))
+                startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                e.printStackTrace()
+            }
+
+
+        }
+
+
+        lastPost.setOnClickListener {
+
+            allReels = viewModel.getAllDocuments()
+            if (allReels?.isNotEmpty()!!) {
+                lastPostData = allReels!![0]
+            }
+
+            val intent = Intent(requireContext(), DetailView::class.java)
+            intent.putExtra("isVideo", lastPostData.isVideo)
+            intent.putExtra("fileUri", lastPostData.videoUri)
+
+            requireContext().startActivity(intent)
         }
 
 

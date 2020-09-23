@@ -1,4 +1,4 @@
-package com.weaponoid.instareels.views
+package com.weaponoid.instareels.viewmodels
 
 import android.content.Context
 import androidx.lifecycle.LiveData

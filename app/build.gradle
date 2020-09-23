@@ -56,4 +56,5 @@ dependencies {
     annotationProcessor 'androidx.room:room-compiler:2.2.5'
     implementation 'com.google.code.gson:gson:2.8.6'
 
+    implementation 'com.github.halilozercan:BetterVideoPlayer:1.1.0'
 }

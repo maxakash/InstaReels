@@ -1,11 +1,10 @@
 package com.weaponoid.instareels.viewmodels
 
 import android.content.Context
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import com.weaponoid.instareels.persistance.Document
 import com.weaponoid.instareels.persistance.DocumentDao
 import com.weaponoid.instareels.persistance.DocumentDatabase
-import com.weaponoid.instareels.persistance.Document
 import org.jsoup.Jsoup
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -36,11 +35,32 @@ class HomeViewModel : ViewModel() {
         val page = Jsoup.connect(url).userAgent(userAgent).get()
 
 
-        //   println(page.toString())
+        //println(page.toString())
 
-        val username = page.toString()
-            .substringAfter("@type\":\"ProfilePage\",\"@id\":\"https:\\/\\/www.instagram.com\\/")
-            .substringBefore("\\/\"")
+        var username = ""
+
+        if (url.contains("instagram.com/p/")) {
+
+            username = page.toString()
+                .substringBefore("\",\"blocked_by_viewer\"")
+                .substringAfter("\"username\":\"")
+
+            var temp = ""
+            while (username != "" && temp != username) {
+                temp = username
+                username = username
+                    .substringBefore("\",\"blocked_by_viewer\"")
+                    .substringAfter("\"username\":\"")
+
+            }
+
+        } else if (url.contains("instagram.com/reel/")) {
+
+            username = page.toString()
+                .substringAfter("@type\":\"ProfilePage\",\"@id\":\"https:\\/\\/www.instagram.com\\/")
+                .substringBefore("\\/\"")
+
+        }
 
 
         val title = page.select("meta[property=og:title]").first().attr("content")
@@ -90,6 +110,7 @@ class HomeViewModel : ViewModel() {
 
     fun getDP(url: String): String {
 
+
         println(url)
         val userAgent =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
@@ -105,7 +126,7 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun getAllDocuments():List<Document>? {
+    fun getAllDocuments(): List<Document>? {
         return dao.findAll()
     }
 
@@ -113,7 +134,6 @@ class HomeViewModel : ViewModel() {
     fun saveDocument(document: Document?) {
         executorService.execute { dao.save(document) }
     }
-
 
 
 }

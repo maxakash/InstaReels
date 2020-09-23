@@ -10,6 +10,13 @@
 
     </style>
 
+    <style name="NoActionbar" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:statusBarColor">#000000
+        </item>
+
+    </style>
+
     <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="iconPadding">0dp</item>
         <item name="android:insetTop">0dp</item>

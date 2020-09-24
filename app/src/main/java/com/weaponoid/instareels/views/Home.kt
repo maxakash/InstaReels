@@ -68,10 +68,6 @@ class Home : Fragment() {
 
         }
 
-        setLastPost()
-
-        getCopiedData()
-
         onClick()
 
     }
@@ -121,6 +117,8 @@ class Home : Fragment() {
             editText.clearFocus()
             editText.requestFocus()
             circularProgressBar.visibility = View.VISIBLE
+            downloadCard.visibility = View.VISIBLE
+            downloadPercent.visibility = View.VISIBLE
             circularProgressBar.progress = 0f
             uiScope.launch {
                 postData = withContext(Dispatchers.IO) { viewModel.getMediaUrl(url) }
@@ -168,6 +166,8 @@ class Home : Fragment() {
                         is Completed -> {
 
                             circularProgressBar.visibility = View.GONE
+                            downloadCard.visibility = View.GONE
+                            downloadPercent.visibility = View.GONE
 
                             downloadDp(dpUrl, postData["handle"].toString())
 
@@ -194,6 +194,8 @@ class Home : Fragment() {
                                 progress = status.progress.percent().toFloat()
 
                             }
+
+                            downloadPercent.text = "${status.progress.percent().toInt()} %"
                         }
 
                     }
@@ -278,16 +280,15 @@ class Home : Fragment() {
             if (allReels?.isNotEmpty()!!) {
                 lastPostData = allReels!![0]
             }
-
-            if (this::postData.isInitialized) {
-                val clip = ClipData.newPlainText("label", postData["caption"].toString())
-                clipboardManager.setPrimaryClip(clip)
-            } else if (this::lastPostData.isInitialized) {
+            if (this::lastPostData.isInitialized) {
                 val clip = ClipData.newPlainText("label", lastPostData.caption)
                 clipboardManager.setPrimaryClip(clip)
+                requireContext().successToast("Caption copied to clipboard.")
+            } else {
+                requireContext().infoToast("Something went wrong.")
             }
 
-            requireContext().successToast("Caption copied to clipboard.")
+
         }
 
         hashtagButton.setOnClickListener {
@@ -296,15 +297,14 @@ class Home : Fragment() {
             if (allReels?.isNotEmpty()!!) {
                 lastPostData = allReels!![0]
             }
-
-            if (this::postData.isInitialized) {
-                val clip = ClipData.newPlainText("label", postData["hashtag"].toString())
-                clipboardManager.setPrimaryClip(clip)
-            } else if (this::lastPostData.isInitialized) {
+            if (this::lastPostData.isInitialized) {
                 val clip = ClipData.newPlainText("label", lastPostData.hashtag)
                 clipboardManager.setPrimaryClip(clip)
+                requireContext().successToast("Hashtags copied to clipboard.")
+            } else {
+                requireContext().infoToast("Something went wrong.")
             }
-            requireContext().successToast("Hashtags copied to clipboard.")
+
         }
 
         shareButton.setOnClickListener {
@@ -318,10 +318,6 @@ class Home : Fragment() {
 
             if (this::lastPostData.isInitialized) {
                 name = lastPostData.fileName
-
-            } else if (this::postData.isInitialized) {
-
-                name = fileName
 
             }
             val intent = Intent(Intent.ACTION_SEND)
@@ -370,15 +366,6 @@ class Home : Fragment() {
                     intent.type = "image/jpeg"
                 }
 
-            } else if (this::postData.isInitialized) {
-
-                name = fileName
-                if (postData["isVideo"] == "true") {
-                    intent.type = "video"
-                } else {
-                    intent.type = "image/jpeg"
-                }
-
             }
 
             val sd = requireContext().getExternalFilesDir("InstaReels")
@@ -417,8 +404,6 @@ class Home : Fragment() {
             }
 
             try {
-
-                println(lastPostData.postUrl)
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(lastPostData.postUrl))
                 startActivity(intent)
             } catch (e: ActivityNotFoundException) {
@@ -427,7 +412,6 @@ class Home : Fragment() {
 
 
         }
-
 
         lastPost.setOnClickListener {
 
@@ -439,11 +423,23 @@ class Home : Fragment() {
             val intent = Intent(requireContext(), DetailView::class.java)
             intent.putExtra("isVideo", lastPostData.isVideo)
             intent.putExtra("fileUri", lastPostData.videoUri)
+            intent.putExtra("postUrl", lastPostData.postUrl)
+            intent.putExtra("hashtag", lastPostData.hashtag)
+            intent.putExtra("caption", lastPostData.caption)
+            intent.putExtra("fileName", lastPostData.fileName)
+            intent.putExtra("id", lastPostData.documentId)
 
             requireContext().startActivity(intent)
         }
 
 
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        setLastPost()
+        getCopiedData()
     }
 
 

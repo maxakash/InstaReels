@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/home_root"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#f2f2f2"
@@ -31,10 +31,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                android:lines="1"
                 android:background="@android:color/transparent"
                 android:backgroundTint="#fff"
                 android:hint="Paste your reel URL here"
+                android:lines="1"
                 android:textSize="16sp" />
 
 
@@ -63,8 +63,8 @@
         android:layout_height="400dp"
         android:layout_margin="10dp"
         android:elevation="0dp"
-        app:cardCornerRadius="6.0dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:cardCornerRadius="6.0dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -74,24 +74,55 @@
                 android:id="@+id/postImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                />
+                android:scaleType="centerCrop" />
 
 
-            <com.mikhaellopez.circularprogressbar.CircularProgressBar
-                android:id="@+id/circularProgressBar"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/downloadCard"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                app:cpb_background_progressbar_color="#b6bbd8"
-                app:cpb_background_progressbar_width="6dp"
-                app:cpb_progress_direction="to_right"
-                app:cpb_progress_max="100"
-                app:cpb_progressbar_color="#3f51b5"
-                app:cpb_progressbar_width="8dp"
-                app:cpb_round_border="true"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                app:cardBackgroundColor="#ffffff"
+                app:cardCornerRadius="40dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                        android:id="@+id/circularProgressBar"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:visibility="gone"
+                        app:cpb_background_progressbar_color="#b6bbd8"
+                        app:cpb_background_progressbar_width="6dp"
+                        app:cpb_progress_direction="to_right"
+                        app:cpb_progress_max="100"
+                        app:cpb_progressbar_color="@color/colorPrimaryDark"
+                        app:cpb_progressbar_width="8dp"
+                        app:cpb_round_border="true" />
+
+
+                    <TextView
+                        android:id="@+id/downloadPercent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:visibility="gone" />
+
+
+                </RelativeLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
 
             <ImageView
                 android:id="@+id/isVideo"
@@ -131,8 +162,7 @@
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/dp"
                         android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        />
+                        android:layout_height="30dp" />
 
                     <TextView
                         android:id="@+id/handle"
@@ -174,16 +204,16 @@
                         android:id="@+id/hashtagButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
                         android:src="@drawable/ic_hashtag" />
 
                     <ImageButton
                         android:id="@+id/captionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:padding="10dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
                         android:src="@drawable/caption" />
 
 
@@ -191,8 +221,8 @@
                         android:id="@+id/repostButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:padding="10dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
                         android:src="@drawable/repost" />
 
 
@@ -200,16 +230,16 @@
                         android:id="@+id/openPostButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:padding="10dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
                         android:src="@drawable/see_post" />
 
                     <ImageButton
                         android:id="@+id/shareButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:padding="10dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
                         android:src="@drawable/share" />
 
 
@@ -222,7 +252,6 @@
 
 
     </com.google.android.material.card.MaterialCardView>
-
 
 
 </LinearLayout>

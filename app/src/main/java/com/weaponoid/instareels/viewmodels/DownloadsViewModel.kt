@@ -25,12 +25,5 @@ class DownloadsViewModel : ViewModel() {
     }
 
 
-    fun saveDocument(document: Document?) {
-        executorService.execute { dao.save(document) }
-    }
 
-
-    fun deleteDocument(document: Document?) {
-        executorService.execute { dao.delete(document) }
-    }
 }

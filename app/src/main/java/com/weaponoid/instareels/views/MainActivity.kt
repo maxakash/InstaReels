@@ -1,16 +1,18 @@
 package com.weaponoid.instareels.views
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.View
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.tabs.TabLayoutMediator
-import com.weaponoid.instareels.adapters.ViewPagerAdapter
 import com.weaponoid.instareels.R
+import com.weaponoid.instareels.adapters.ViewPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -28,7 +30,30 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun setPager(){
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.top_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+
+            R.id.openInsta -> {
+                //sa
+            }
+            R.id.settings -> {
+
+                startActivity(Intent(this, Settings::class.java))
+            }
+        }
+
+
+        return true
+    }
+
+    private fun setPager() {
         view_pager.adapter =
             ViewPagerAdapter(this)
 
@@ -77,7 +102,8 @@ class MainActivity : AppCompatActivity() {
 
                 } else {
                     checkPermission()
-                    Toast.makeText(this, "Grant permission to use this app.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Grant permission to use this app.", Toast.LENGTH_SHORT)
+                        .show()
                 }
         }
     }

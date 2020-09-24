@@ -3,10 +3,29 @@
 
 
     <item
-        android:id="@+id/help"
-        android:icon="@drawable/help"
-        android:title="Help"
+        android:id="@+id/openInsta"
+        android:icon="@drawable/instagram"
+        android:title="Open Instagram"
         app:showAsAction="ifRoom|collapseActionView" />
+
+
+    <item
+        android:id="@+id/help"
+        android:icon="@drawable/menu"
+        android:title="How to Download?"
+        />
+
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/share"
+        android:title="Share App"
+        />
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/menu"
+        android:title="Settings"
+        />
 
 
 </menu>

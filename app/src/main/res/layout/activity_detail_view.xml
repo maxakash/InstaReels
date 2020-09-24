@@ -32,8 +32,7 @@
             <com.halilibo.bettervideoplayer.BetterVideoPlayer
                 android:id="@+id/detailVideo"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                />
+                android:layout_height="match_parent" />
 
 
         </com.google.android.material.card.MaterialCardView>
@@ -48,8 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:backgroundTint="@color/colorPrimarytrans"
-        app:fabAlignmentMode="end"
-        app:navigationIcon="@drawable/back">
+        app:fabAlignmentMode="end">
 
 
         <LinearLayout
@@ -61,24 +59,39 @@
             android:gravity="start"
             android:orientation="horizontal">
 
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="onClick"
+                android:padding="10dp"
+                android:src="@drawable/back" />
+
             <androidx.legacy.widget.Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
+
             <ImageButton
                 android:id="@+id/hashtagButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ripple"
-                android:padding="10dp"
-                android:src="@drawable/ic_hashtag" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="onClick"
+                android:paddingStart="10dp"
+                android:paddingTop="15dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="15dp"
+                android:src="@drawable/hashtag" />
 
             <ImageButton
                 android:id="@+id/captionButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="onClick"
                 android:padding="10dp"
                 android:src="@drawable/caption" />
 
@@ -88,6 +101,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="onClick"
                 android:padding="10dp"
                 android:src="@drawable/repost" />
 
@@ -97,6 +111,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="onClick"
                 android:padding="10dp"
                 android:src="@drawable/see_post" />
 
@@ -104,10 +119,21 @@
                 android:id="@+id/shareButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="5dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="onClick"
                 android:padding="10dp"
                 android:src="@drawable/share" />
+
+            <ImageButton
+                android:id="@+id/deleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="5dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="onClick"
+                android:padding="10dp"
+                android:src="@drawable/delete" />
 
 
         </LinearLayout>

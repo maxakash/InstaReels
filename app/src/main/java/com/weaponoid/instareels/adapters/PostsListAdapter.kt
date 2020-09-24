@@ -50,6 +50,12 @@ class PostsListAdapter(private var postsList: MutableList<Document>) :
             val intent = Intent(holder.view.context, DetailView::class.java)
             intent.putExtra("isVideo", post.isVideo)
             intent.putExtra("fileUri", post.videoUri)
+            intent.putExtra("postUrl", post.postUrl)
+            intent.putExtra("hashtag", post.hashtag)
+            intent.putExtra("caption", post.caption)
+            intent.putExtra("fileName", post.fileName)
+            intent.putExtra("id",post.documentId)
+
             holder.view.context.startActivity(intent)
 
         }

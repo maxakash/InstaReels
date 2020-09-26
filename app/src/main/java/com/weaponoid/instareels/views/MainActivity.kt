@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private val tabNames = arrayListOf<String>("Home", "Downloads")
+    private var returnUrl: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +29,24 @@ class MainActivity : AppCompatActivity() {
 
         checkPermission()
 
+    }
+
+
+    fun getShareIntent(): String {
+
+        if (intent?.action == Intent.ACTION_SEND) {
+            if ("text/plain" == intent.type) {
+                returnUrl = intent.getStringExtra(Intent.EXTRA_TEXT)!!
+            }
+        } else {
+            returnUrl = ""
+        }
+
+        return returnUrl
+    }
+
+    fun setShareIntent() {
+        intent = null
     }
 
 
@@ -41,12 +60,28 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
 
             R.id.openInsta -> {
-                //sa
+                try {
+                    startActivity(packageManager.getLaunchIntentForPackage("com.instagram.android"))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
             R.id.settings -> {
 
                 startActivity(Intent(this, Settings::class.java))
             }
+
+            R.id.share -> {
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.type = "text/plain";
+                intent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Download Insta Reels\nhttps://play.google.com/store/apps/details?id=com.weaponoid.instareels"
+                )
+                startActivity(Intent.createChooser(intent, "Share to"))
+
+            }
+
         }
 
 

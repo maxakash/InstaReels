@@ -64,11 +64,13 @@ class Home : Fragment() {
 
         downloadReel.setOnClickListener {
             validateUrl(editText.text.toString())
+            helpView.visibility = View.GONE
             lastPost.visibility = View.VISIBLE
 
         }
 
         onClick()
+
 
     }
 
@@ -78,6 +80,7 @@ class Home : Fragment() {
         allReels = viewModel.getAllDocuments()
         if (allReels?.isNotEmpty()!!) {
             val post = allReels!![0]
+            helpView.visibility = View.GONE
             lastPost.visibility = View.VISIBLE
 
             dp.loadListImage(post.dpUrl)
@@ -90,6 +93,8 @@ class Home : Fragment() {
                 isImage.visibility = View.VISIBLE
             }
             lastPostData = post
+        }else{
+            helpView.visibility = View.VISIBLE
         }
     }
 
@@ -101,6 +106,12 @@ class Home : Fragment() {
         if (url != " " && url.startsWith("https://") || url.startsWith("http://")) {
             requireContext().infoToast("Validating copied link")
             validateUrl(url)
+        } else {
+            val shareIntent = (activity as MainActivity).getShareIntent()
+            if (shareIntent != "") {
+                (activity as MainActivity).setShareIntent()
+                validateUrl(shareIntent)
+            }
         }
     }
 
@@ -113,6 +124,7 @@ class Home : Fragment() {
         } else {
 
             postUrl = url
+            helpView.visibility = View.GONE
             lastPost.visibility = View.VISIBLE
             editText.clearFocus()
             editText.requestFocus()
@@ -148,7 +160,12 @@ class Home : Fragment() {
 
                     dp.loadListImage(dpUrl)
 
-                    download(mediaUrl)
+                    try {
+                        download(mediaUrl)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+
                 }
 
             }
@@ -178,7 +195,7 @@ class Home : Fragment() {
 
                             fileName = videoFile.name
 
-                            println(fileName)
+                            // println(fileName)
                             url.file().copyTo(videoFile, true)
                             fileUri = Uri.fromFile(videoFile).toString()
 
@@ -217,7 +234,7 @@ class Home : Fragment() {
                         subscribe { status ->
                             when (status) {
                                 is Completed -> {
-                                    println("dp downloaded")
+                                    //  println("dp downloaded")
                                     val dpFile = File(
                                         requireContext().getExternalFilesDir("InstaReels"),
                                         "$username.png"
@@ -324,7 +341,7 @@ class Home : Fragment() {
             val sd = requireContext().getExternalFilesDir("InstaReels")
             val toShare = File(sd, name)
 
-            println(toShare.exists())
+            // println(toShare.exists())
             val authority = "com.weaponoid.instareels.provider"
             val contentUri = FileProvider.getUriForFile(requireContext(), authority, toShare)
             intent.putExtra(Intent.EXTRA_STREAM, contentUri)

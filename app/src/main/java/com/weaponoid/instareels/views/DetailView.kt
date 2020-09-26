@@ -43,8 +43,7 @@ class DetailView : AppCompatActivity() {
             detailImage.setImageURI(Uri.parse(fileUri))
         }
 
-        println(fileUri)
-
+        //  println(fileUri)
 
     }
 
@@ -102,14 +101,20 @@ class DetailView : AppCompatActivity() {
                         }
 
                         finish()
-
                     }
+
                     .show()
-
-
             }
 
 
+        }
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        if (detailVideo.isPlaying) {
+            detailVideo.stop()
         }
     }
 

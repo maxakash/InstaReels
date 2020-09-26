@@ -35,7 +35,8 @@ class HomeViewModel : ViewModel() {
         val page = Jsoup.connect(url).userAgent(userAgent).get()
 
 
-        //println(page.toString())
+//        println(url)
+//        println(page.toString())
 
         var username = ""
 
@@ -84,15 +85,31 @@ class HomeViewModel : ViewModel() {
 
         val data = hashMapOf<String, String>()
 
-        when (page.select("meta[name=medium]").first().attr("content")) {
-            "video" -> {
+        when (page.select("meta[property=og:type]").first().attr("content")) {
+            "instapp:video"  -> {
                 data["mediaUrl"] = page.select("meta[property=og:video]").first().attr("content")
                 data["isVideo"] = "true"
             }
+            "instapp:photo" -> {
+                data["mediaUrl"] = page.select("meta[property=og:image]").first().attr("content")
+                data["isVideo"] = "false"
+            }
+
+            "video"  -> {
+                data["mediaUrl"] = page.select("meta[property=og:video]").first().attr("content")
+                data["isVideo"] = "true"
+            }
+
+            "photo" -> {
+                data["mediaUrl"] = page.select("meta[property=og:image]").first().attr("content")
+                data["isVideo"] = "false"
+            }
+
             "image" -> {
                 data["mediaUrl"] = page.select("meta[property=og:image]").first().attr("content")
                 data["isVideo"] = "false"
             }
+
             else ->
                 data["mediaUrl"] = ""
 

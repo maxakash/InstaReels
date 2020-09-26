@@ -44,7 +44,14 @@ class Downloads : Fragment() {
 
         viewModel.getAllDocuments()?.observe(viewLifecycleOwner, {
             listAdapter.updateUiList(it)
-            println("size is ${it.size}")
+
+            if(it.isEmpty()){
+                downloadPosts.visibility = View.GONE
+                noDownloadedPost.visibility = View.VISIBLE
+            }else{
+                noDownloadedPost.visibility = View.GONE
+                downloadPosts.visibility = View.VISIBLE
+            }
         })
 
     }

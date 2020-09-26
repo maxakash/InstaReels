@@ -111,6 +111,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:gravity="start|center"
+                android:onClick="onClick"
                 android:text="Feedback"
                 android:textAllCaps="false"
                 android:textColor="#000"
@@ -126,6 +127,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:gravity="start|center"
+                android:onClick="onClick"
                 android:text="Rate Us"
                 android:textAllCaps="false"
                 android:textColor="#000"
@@ -141,6 +143,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:gravity="start|center"
+                android:onClick="onClick"
                 android:text="Disclaimer"
                 android:textAllCaps="false"
                 android:textColor="#000"
@@ -156,6 +159,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:gravity="start|center"
+                android:onClick="onClick"
                 android:text="Privacy policy"
                 android:textAllCaps="false"
                 android:textColor="#000"
@@ -177,7 +181,7 @@
                 android:textColor="#000"
                 android:textSize="16sp"
                 app:backgroundTint="@android:color/transparent"
-                app:rippleColor="#eaeaea" />
+                 />
 
 
         </LinearLayout>
